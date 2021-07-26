@@ -1,0 +1,7 @@
+server:
+  port: 8000
+  host: locahost
+hashkey: abc123abc123abc123abc123
+sqlite:
+  database: ../sqlite/users.db
+

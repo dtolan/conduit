@@ -1,0 +1,24 @@
+
+api:
+  auth: header
+  host: api.example.com
+  protocol: https
+  header: X-Auth-Token
+  defaults:
+    token: 123456abcd
+vcd:
+  auth: vcd
+  defaults:
+    protocol: https
+    user: example@System
+    password: '123456abcd'
+  location:
+    host: vcd.example.com
+salt:
+  auth: salt
+  defaults:
+    protocol: https
+    user: salt-user
+    password: 123456abcd
+  location:
+    host: salt.example.com

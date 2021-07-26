@@ -1,0 +1,22 @@
+google: 
+  auth: none
+  host: www.google.com
+  protocol: https
+api:
+  use_default: true
+  auth: header
+  host: api.example.com
+  protocol: https
+  header: X-Auth-Token
+vcd:
+  use_default: true
+  auth: vcd
+  protocol: https
+  location:
+    host: vcd.example.com
+salt:
+  use_default: true
+  auth: salt
+  protocol: https
+  location:
+    host: salt.example.com

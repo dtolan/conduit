@@ -56,6 +56,8 @@ salt = Salt(mappings=mappings)
 crypt = Crypt(hash_key)
 parser = Parser(mappings=mappings, sqlite=sqlite, crypt=crypt)
 
+broken_header_keys = ['Transfer-Encoding', 'Connection', 'Content-Encoding']
+
 
 def is_authenticated_user(user=None, password=None):
     print("here")
@@ -67,6 +69,15 @@ def get_user(headers):
         return headers['User']
     except:
         return None
+
+
+def reset_headers(headers):
+    valid_headers = dict()
+    for key in headers:
+        if key not in broken_header_keys:
+            value = headers[key]
+            valid_headers[key] = value
+    return valid_headers
 
 
 @post("<:re:.+>")
@@ -82,12 +93,29 @@ def post_handler():
     if auth == 'salt':
         salt.login(auth_values, headers['Destination'])
         return salt.request(request.body.read())
+    elif auth == 'vcd':
+        host = parser.mappedValue('host', headers['Destination'])
+        vcd = VcdLogin(host)
+        login = vcd.login(auth_values['user'], auth_values['password'])
+        valid_headers = reset_headers(login['headers'])
+        for key in valid_headers:
+            value = valid_headers[key]
+            response.add_header(key, value)
+        return login['text']
     elif auth == 'header':
         header_key = parser.mappedValue('header', headers['Destination'])
         if 'token' in auth_values:
             headers[header_key] = auth_values['token']
-    data = requester.post(endpoint, headers=headers, body=request.body.read())
+    else:
+        print(auth)
+        response.status = 400
+        return {"message": "invalid request type"}
 
+    data = requester.post(endpoint, headers=headers, body=request.body.read())
+    valid_headers = reset_headers(data.headers)
+    for key in valid_headers:
+        value = valid_headers[key]
+        response.add_header(key, value)
     return data
 
 
@@ -104,26 +132,29 @@ def get_handler():
     if auth == 'salt':
         salt.login(headers['Destination'])
         return
+    elif auth == 'vcd':
+        host = parser.mappedValue('host', headers['Destination'])
+        vcd = VcdLogin(host)
+        login = vcd.login(auth_values['user'], auth_values['password'])
+        valid_headers = reset_headers(login['headers'])
+        for key in valid_headers:
+            value = valid_headers[key]
+            response.add_header(key, value)
+        return login['text']
     elif auth == 'header':
         header_key = parser.mappedValue(auth, headers['Destination'])
         if 'token' in auth_values:
             headers[header_key] = auth_values['token']
-    elif auth == 'vcd':
-        host = parser.mappedValue('host', headers['Destination'])
-        print(host)
-        pprint(auth_values)
-        vcd = VcdLogin(host, auth_values['user'], auth_values['password'])
-        vcd.login()
-        return
     else:
         print(auth)
         response.status = 400
         return {"message": "invalid request type"}
 
     data = requester.get(endpoint, headers=headers)
-    response.status = data.status_code
-    if data.status_code > 299:
-        return {"message": response.status_line}
+    valid_headers = reset_headers(data.headers)
+    for key in valid_headers:
+        value = valid_headers[key]
+        response.add_header(key, value)
 
     return data
 
@@ -138,14 +169,14 @@ def put_handler():
     auth = parser.mappedValue('auth', headers['Destination'])
     auth_values = parser.userMappedValue(
         user, headers['Destination'])
-    if auth == 'salt':
-        salt.login(auth_values, headers['Destination'])
-        return salt.request(request.body.read())
-    elif auth == 'header':
+    if auth == 'header':
         header_key = parser.mappedValue('header', headers['Destination'])
         if 'token' in auth_values:
             headers[header_key] = auth_values['token']
-
+    else:
+        print(auth)
+        response.status = 400
+        return {"message": "invalid request type"}
     data = requester.put(endpoint, headers=headers, body=request.body.read())
 
     return data
