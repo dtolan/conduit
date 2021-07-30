@@ -10,58 +10,10 @@ from classes.sqlite import Sqlite
 from classes.users import Users
 
 
-def create_user(conn, userInfo):
-    """
-    Create a new project into the projects table
-    :param conn:
-    :param project:
-    :return: project id
-    """
-    sql = ''' INSERT INTO users(name,password,active,entry_date)
-              VALUES(?,?,?,?) '''
-    cur = conn.cursor()
-    cur.execute(sql, userInfo)
-    conn.commit()
-    return cur.lastrowid
-
-
-def update_user(conn, userId, password):
-    """
-    Create a new project into the projects table
-    :param conn:
-    :param project:
-    :return: project id
-    """
-    sql = "UPDATE users set password = '{}' where id = {}".format(
-        password, userId)
-    cur = conn.cursor()
-    cur.execute(sql)
-    conn.commit()
-    return cur.lastrowid
-
-
-def get_current_user(conn, user):
-    """
-    Query tasks by priority
-    :param conn: the Connection object
-    :param priority:
-    :return:
-    """
-    cur = conn.cursor()
-    cur.execute("SELECT id,password FROM users WHERE name=?", (user,))
-
-    rows = cur.fetchall()
-
-    for row in rows:
-        return row
-
-
 def main():
-    print(getpass.getuser())
-    if 'linux' in sys.platform.lower():
-        username = getpass.getuser()
-    else:
-        username = input("Input User ID : ")
+    print("Current user name : {}".format(getpass.getuser()))
+
+    username = input("Input User ID : ")
 
     try:
         with open(r'../conf/server.yaml') as mainConfig:
@@ -86,7 +38,7 @@ def main():
             if not verified_password:
                 print("Error: Unable to verify current password")
                 sys.exit()
-        # create a new project
+        # Update Existing Password
         user_id = users.get_and_update_password(
             user_id=user_id, user_name=username)
 

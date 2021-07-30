@@ -28,14 +28,24 @@ class Mapping:
             user_id, map_type, host)
         return self.sqlite.select_from_database(sql)
 
-    def update_user_password(self, user_id, password):
+    def get_maps(self, user_id):
+        """
+        :param name:
+        :return: id (int)
+        :return: password (byteString)
+        """
+        sql = "SELECT * FROM Mapping WHERE User_ID = {}".format(
+            user_id)
+        return self.sqlite.select_from_database(sql)
+
+    def update_map(self, map_id, host, token, user, password):
         """
         :param user_id:
         :param password:
         :return: id
         """
-        sql = "UPDATE users set password = '{}' WHERE id = {}".format(
-            password, user_id)
+        sql = "UPDATE Mapping set Host = '{}',Token = '{}' ,User= '{}' ,Password = '{}' WHERE id = {}".format(
+            host, token, user, password, map_id)
         return self.sqlite.update_database(sql)
 
     def create_map(self, user_id, map_type, host, token, user, password):
@@ -47,18 +57,14 @@ class Mapping:
         """
         sql = "INSERT INTO Mapping(User_ID,Type,Host,Token,User,Password) VALUES({},'{}','{}','{}','{}','{}')".format(
             user_id, map_type, host, token, user, password)
-
         return self.sqlite.insert_into_database(sql)
 
-    def delete_user(self, user_id):
+    def delete_map(self, map_id):
         """
         Delete a user 
         :param user_id:
         :return: 
         """
-        sql = "DELETE FROM users WHERE id = {}".format(
-            user_id)
-        cur = self.conn.cursor()
-        cur.execute(sql)
-        self.conn.commit()
-        return cur.lastrowid
+        sql = "DELETE FROM Mapping WHERE id = {}".format(
+            map_id)
+        return self.sqlite.update_database(sql)

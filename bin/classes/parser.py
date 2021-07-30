@@ -30,6 +30,7 @@ class Parser():
         return returnHeaders
 
     def mappedValue(self, value, destination):
+
         explodeDestination = destination.split(':')
         primary_value = explodeDestination.pop(0)
         return_value = None
@@ -52,6 +53,7 @@ class Parser():
         return return_value
 
     def userMappedValue(self, user, destination):
+
         explodeDestination = destination.split(':')
         primary_value = explodeDestination[0]
         if primary_value not in self.mappings:
@@ -139,3 +141,8 @@ class Parser():
         for x in range(3):
             explodeUrl.pop(0)
         return "/".join(explodeUrl)
+
+    def base64_decode(self, encoded):
+        base64_bytes = encoded.encode('ascii')
+        encoded_bytes = base64.b64decode(base64_bytes)
+        return encoded_bytes.decode('ascii')
