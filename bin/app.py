@@ -205,6 +205,9 @@ def post_handler():
             bottle.response.status = 400
 
         return return_data
+    elif headers['Destination'] == 'validate':
+        bottle.response.status = 200
+        return
     else:
         data = bottle.request.body.read().decode()
         bottle.response.status = 400
@@ -260,6 +263,9 @@ def get_handler():
         header_key = parser.mappedValue(auth, headers['Destination'])
         if 'token' in auth_values:
             headers[header_key] = auth_values['token']
+    elif headers['Destination'] == 'validate':
+        bottle.response.status = 200
+        return
     else:
         bottle.response.status = 400
         return {"message": "invalid request type"}
